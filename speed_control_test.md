@@ -1,32 +1,32 @@
 # 社区机器人支持忙时5000PR/小时的方案验证
 
 ## 背景
+由于原机器人架构采用直接透传的方式，将来自代码平台的所有请求直接转发给特定的机器人。当瞬时并发请求较高时，可能因超出下游robot处理能力导致消息丢失。
 
-#### 原机器人服务架构
+为解决此问题，新升级架构采用kafka作为消息队列，缓存所有请求，robot-dispatcher控制下发速度。
+现对新升级架构进行压力测试，验证robot-dispatcher控制下发速度的精确性和可靠性。
+
+#### 原架构
 
 ```mermaid
 graph TD
 A[代码平台]-->B(robot-access)
-
+B -->robot-A
 B -->robot-X
 ```
 
-#### 新升级架构
+#### 升级架构
 ```mermaid
 graph TD
 C[代码平台] --> A
 A[robot-delivery]
-
-A --> |push|D[KAFKA]
-
-D --> |pull|E[robot-dispatcher]
-E --> |http|F[robot-access]
-
+A --> D[KAFKA]
+D --> E[robot-dispatcher]
+E --> F[robot-access]
 F --> I[robot A]
 F --> J[robot X]
 ```
 
-其中核心在于robot-dispatcher的分发速度的控制，现对速度控制进行压测验证。
 
 ## 准备工作
 
@@ -92,7 +92,7 @@ return fmt.Errorf("request num %s", e.Comment.Body)
 	}
 ```
 
-## 验证
+## 验证过程
 #### 发送请求
 
 执行压测脚本，向robot-delivery发送请求，日志如下：
