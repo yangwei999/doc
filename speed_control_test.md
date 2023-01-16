@@ -1,4 +1,4 @@
-# dispatcher机器人事件分发限速验证
+# 社区机器人支持忙时5000PR/小时的方案验证
 
 ## 背景
 
@@ -6,30 +6,24 @@
 
 ```mermaid
 graph TD
-A[代码平台]-->|https|B(robot-access)
-B -->|http|C(robot-A)
-B -->|http|D(robot-B)
-B -->|http|E(robot-X)
+A[代码平台]-->B(robot-access)
+
+B -->robot-X
 ```
 
 #### 新升级架构
 ```mermaid
 graph TD
-A[robot-delivery 1]
-B[robot-delivery 2]
-C[robot-delivery x]
+C[代码平台] --> A
+A[robot-delivery]
+
 A --> |push|D[KAFKA]
-B --> |push|D
-C --> |push|D
+
 D --> |pull|E[robot-dispatcher]
-E --> |http|F[robot-access 1]
-E --> |http|G[robot-access 2]
-E --> |http|H[robot-access 3]
+E --> |http|F[robot-access]
+
 F --> I[robot A]
-F --> J[robot B]
-G --> J
-H --> J
-H --> K[robot X]
+F --> J[robot X]
 ```
 
 其中核心在于robot-dispatcher的分发速度的控制，现对速度控制进行压测验证。
@@ -78,7 +72,7 @@ return fmt.Errorf("request num %s", e.Comment.Body)
 ```go
 	requestNum := 1
 	for {
-	    	// 设置e.Comment.Body的值为requestNum
+	    // 设置e.Comment.Body的值为requestNum
 		req := buildRequest(plat, o.endpoint, requestNum)
 
 		wg.Add(1)
