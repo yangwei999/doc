@@ -76,7 +76,7 @@ return fmt.Errorf("request num %s", e.Comment.Body)
 ```go
 	requestNum := 1
 	for {
-	    // 设置e.Comment.Body的值为requestNum
+	    	// 设置e.Comment.Body的值为requestNum
 		req := buildRequest(plat, o.endpoint, requestNum)
 
 		wg.Add(1)
